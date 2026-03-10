@@ -135,6 +135,14 @@ EMAIL_FROM_NAME=My Site
 
 If `RESEND_API_KEY` is not set, the app runs normally without email functionality.
 
+## Default Images
+
+The `public/` folder includes placeholder images you should replace with your own:
+
+- `public/pe-icon.png` — Favicon / app icon
+- `public/pe-icon-reverse.png` — Reversed variant of the icon (for dark backgrounds)
+- `public/default-og.png` — Default Open Graph image used when no page-specific image is set
+
 ## Block Preview Images
 
 The admin block picker shows preview thumbnails stored in `public/blocks/`. You can replace these with your own 480x320 `.webp` images to match your design:
