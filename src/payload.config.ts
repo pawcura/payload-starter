@@ -94,8 +94,12 @@ export default buildConfig({
     s3Storage({
       collections: {
         media: {
-          generateFileURL: ({ filename }) =>
-            `${process.env.S3_PUBLIC_URL}/${filename}`,
+          ...(process.env.S3_PUBLIC_URL
+            ? {
+                generateFileURL: ({ filename }) =>
+                  `${process.env.S3_PUBLIC_URL}/${filename}`,
+              }
+            : {}),
         },
       },
       bucket: process.env.S3_BUCKET!,
@@ -105,7 +109,7 @@ export default buildConfig({
           accessKeyId: process.env.S3_ACCESS_KEY_ID!,
           secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
         },
-        region: 'auto',
+        region: process.env.S3_DEFAULT_REGION || 'auto',
         forcePathStyle: true,
       },
     }),
