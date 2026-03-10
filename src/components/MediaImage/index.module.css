@@ -1,0 +1,35 @@
+/* @/components/MediaImage/index.module.css */
+.imageWrapper {
+    position: relative;
+    border-radius: var(--radius-lg);
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    margin-bottom: var(--space-4);
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-medium), box-shadow var(--transition-medium);
+
+    img {
+        width: 100%;
+        height: auto;
+        display: block;
+        transition: filter var(--transition-medium);
+        @media (prefers-color-scheme: dark) {
+            filter: brightness(0.85) contrast(0.9);
+        }
+    }
+
+    @media (min-width: 768px) {
+        &:hover img {
+            filter: brightness(0.98) contrast(1);
+
+            @media (prefers-color-scheme: dark) {
+                filter: brightness(0.9) contrast(0.95);
+            }
+        }
+    }
+}
+/* this is needed to set flex conditionally for our different layouts */
+.flex {
+    flex: 1;
+}

@@ -1,0 +1,5 @@
+/* @/components/Container/index.module.css */
+.container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+}

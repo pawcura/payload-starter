@@ -1,0 +1,15 @@
+/* @/app/(frontend)/blog/page.module.css */
+.pageTitle {
+    /* we'll remove the title's margin top so it sits flush with the top of the image */
+    margin-top: 0;
+}
+
+.featuredTitle {
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-6);
+    @media (max-width: 768px) {
+        margin-bottom: var(--space-4);
+    }
+}

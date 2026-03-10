@@ -1,5 +1,11 @@
 import { withPayload } from '@payloadcms/next/withPayload'
 
+const s3PublicUrl = process.env.S3_PUBLIC_URL || ''
+
+const urls = s3PublicUrl
+  ? [new URL(`${s3PublicUrl}/**`)]
+  : []
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Your Next.js config here
@@ -12,6 +18,9 @@ const nextConfig = {
 
     return webpackConfig
   },
+  images: {
+    remotePatterns: urls
+  }
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

@@ -1,0 +1,18 @@
+.body {
+    font-size: 1rem;
+    line-height: 1.6;
+
+    @media (min-width: 768px) {
+        font-size: 1.125rem;
+        line-height: 1.7;
+    }
+
+    /* we'll want to remove the margin top of the first child and margin bottom last child,
+which is added by the p element */
+    p:first-child {
+        margin-top: 0;
+    }
+    p:last-child {
+        margin-bottom: 0;
+    }
+}

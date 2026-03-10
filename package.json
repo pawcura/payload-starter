@@ -1,32 +1,37 @@
 {
-  "name": "payload-cms-beginner-course-practice",
+  "name": "payload-starter",
   "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
+  "description": "A Payload CMS starter template with Next.js, MongoDB, and S3 storage.",
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build --experimental-build-mode compile",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next build --experimental-build-mode generate && cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "3.66.0",
-    "@payloadcms/next": "3.66.0",
-    "@payloadcms/richtext-lexical": "3.66.0",
-    "@payloadcms/ui": "3.66.0",
+    "@next/third-parties": "15.4.10",
+    "@payloadcms/db-mongodb": "3.67.0",
+    "@payloadcms/email-resend": "3.67.0",
+    "@payloadcms/next": "3.67.0",
+    "@payloadcms/plugin-seo": "3.67.0",
+    "@payloadcms/richtext-lexical": "3.67.0",
+    "@payloadcms/storage-s3": "3.67.0",
+    "@payloadcms/ui": "3.67.0",
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
-    "next": "15.4.8",
-    "payload": "3.66.0",
+    "lucide-react": "^0.562.0",
+    "next": "15.4.10",
+    "payload": "3.67.0",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "sharp": "0.34.2"
@@ -51,6 +56,9 @@
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9 || ^10"
+  },
+  "overrides": {
+    "@img/sharp-libvips-darwin-arm64": "1.2.4"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

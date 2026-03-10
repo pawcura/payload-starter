@@ -1,67 +1,165 @@
-# Payload Blank Template
+# Payload Starter
 
-This template comes configured with the bare minimum to get started on anything you need.
+A production-ready starter template built with [Payload CMS](https://payloadcms.com), Next.js, MongoDB, and S3-compatible storage.
 
-## Quick start
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/PLACEHOLDER)
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+## Features
 
-## Quick Start - local setup
+- **Payload CMS 3** with Next.js App Router
+- **Pages** with configurable block-based layouts (Hero, Text, Text & Image, Cards)
+- **Blog** with categories, featured posts, pagination, and related posts
+- **SEO** fields with auto-generated meta tags, Open Graph, sitemaps, and canonical URLs
+- **S3 storage** for media with automatic image resizing and blur placeholders
+- **Dark mode** support via CSS `light-dark()` with semantic design tokens
+- **Seed script** to populate initial content in one click from the admin dashboard
+- **Responsive** navigation with mobile menu, focus trapping, and keyboard support
 
-To spin up this template locally, follow these steps:
+## One-Click Deploy (Railway)
 
-### Clone
+Click the **Deploy on Railway** button above. Railway will provision:
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+- A MongoDB database
+- An S3-compatible object storage bucket
+- The Next.js + Payload application
 
-### Development
+After deployment, visit `/admin` to create your first user, then click **Seed Database** on the dashboard to populate sample content.
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URI` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+## Local Development
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+### Prerequisites
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+- Node.js 18.20+ or 20.9+
+- pnpm 9 or 10
+- MongoDB (local or remote)
+- An S3-compatible bucket (Cloudflare R2, AWS S3, MinIO, etc.)
 
-#### Docker (Optional)
+### Setup
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+```bash
+# Clone the repo
+git clone <your-repo-url>
+cd payload-starter
 
-To do so, follow these steps:
+# Install dependencies
+pnpm install
 
-- Modify the `MONGODB_URI` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URI` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+# Copy environment variables
+cp .env.example .env
+```
 
-## How it works
+Fill in your `.env` values (see [Environment Variables](#environment-variables)), then:
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+```bash
+pnpm dev
+```
 
-### Collections
+Visit `http://localhost:3000/admin` to create your first user.
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+## Seeding the Database
 
-- #### Users (Authentication)
+The starter includes a seed script that populates your database with sample content so the site works out of the box. Without seeding, the homepage shows a "Go to Admin Panel" message and the blog returns a 404 (it requires a page with slug `blog`).
 
-  Users are auth-enabled collections that have access to the admin panel.
+### Option 1: One-Click Seed (Recommended)
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+1. Visit `/admin` and create your first user
+2. On the dashboard, click **Seed Database with Sample Content**
+3. This creates: a Home page, Blog page, sample blog post, category, navigation links, and site settings
 
-- #### Media
+### Option 2: Manual Setup
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+Create the following manually from the admin panel:
 
-### Docker
+1. A **Home** page with slug `home` — this is your homepage
+2. A **Blog** page with slug `blog` — this is your blog index
+3. At least one **Media** upload for featured images
+4. Update **Settings** (globals) with your site name and description
+5. Update **Navigation** (globals) with links to your pages
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+## Environment Variables
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URI` | Yes | MongoDB connection string |
+| `PAYLOAD_SECRET` | Yes | Secret key for Payload authentication |
+| `NEXT_PUBLIC_SERVER_URL` | Yes | Public URL of your site (e.g. `https://yourdomain.com`) |
+| `SITE_NAME` | No | Site name used in meta tags and admin (default: `Payload Starter`) |
+| `SITE_DESCRIPTION` | No | Default site description for meta tags |
+| `NEXT_PUBLIC_COPYRIGHT_HOLDER` | No | Name shown in footer copyright |
+| `S3_API` | Yes | S3 endpoint URL |
+| `S3_BUCKET` | Yes | S3 bucket name |
+| `S3_ACCESS_KEY_ID` | Yes | S3 access key |
+| `S3_SECRET_ACCESS_KEY` | Yes | S3 secret key |
+| `S3_PUBLIC_URL` | Yes | Public CDN URL for media (e.g. `https://your-bucket.r2.dev`) |
+| `RESEND_API_KEY` | No | Resend API key — email features are disabled if not set |
+| `EMAIL_FROM_ADDRESS` | No | Sender email address (default: `noreply@example.com`) |
+| `EMAIL_FROM_NAME` | No | Sender name (default: value of `SITE_NAME`) |
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+## Switching from Railway Buckets to Cloudflare R2
 
-## Questions
+Railway provides S3-compatible storage out of the box. If you'd like to use Cloudflare R2 instead:
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+1. Create an R2 bucket in your Cloudflare dashboard
+2. Under **R2 > Manage R2 API Tokens**, create a token with read/write access
+3. Under your bucket's **Settings > Public Access**, enable public access and note the public URL
+4. Update your environment variables:
+
+```env
+S3_API=https://<account-id>.r2.cloudflarestorage.com
+S3_BUCKET=your-r2-bucket-name
+S3_ACCESS_KEY_ID=your-r2-access-key
+S3_SECRET_ACCESS_KEY=your-r2-secret-key
+S3_PUBLIC_URL=https://pub-<hash>.r2.dev
+```
+
+5. Redeploy your application
+
+> **Note:** Existing media uploaded to Railway's bucket will not be migrated automatically. Upload new media after switching.
+
+## Email (Optional)
+
+Email features (password reset, etc.) use [Resend](https://resend.com). To enable:
+
+1. Create a Resend account and get an API key
+2. Verify your sending domain in Resend
+3. Set the environment variables:
+
+```env
+RESEND_API_KEY=re_xxxxx
+EMAIL_FROM_ADDRESS=noreply@yourdomain.com
+EMAIL_FROM_NAME=My Site
+```
+
+If `RESEND_API_KEY` is not set, the app runs normally without email functionality.
+
+## Block Preview Images
+
+The admin block picker shows preview thumbnails stored in `public/blocks/`. You can replace these with your own 480x320 `.webp` images to match your design:
+
+- `public/blocks/hero-block-480x320.webp`
+- `public/blocks/text-block-480x320.webp`
+- `public/blocks/textandmedia-block-480x320.webp`
+- `public/blocks/cards-block-480x320.webp`
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (frontend)/          # Public-facing Next.js pages
+│   │   ├── [slug]/          # Dynamic pages (home, about, etc.)
+│   │   └── blog/            # Blog index and post pages
+│   └── (payload)/           # Payload admin panel
+├── blocks/                  # Block configs and components
+├── collections/             # Payload collection configs
+├── components/              # Shared React components
+├── custom/                  # Custom admin components
+├── fields/                  # Reusable field configs (SEO)
+├── globals/                 # Payload global configs
+├── seed/                    # Database seed endpoint
+└── utilities/               # Helper functions
+```
+
+## License
+
+MIT
