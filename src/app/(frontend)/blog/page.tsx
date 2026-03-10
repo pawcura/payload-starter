@@ -121,7 +121,7 @@ export default async function Page({ searchParams }: Props) {
           </div>
         </Container>
       </Section>
-      {blogs.docs.length > 0 && (
+      {blogs.docs.length > 1 && (
         <Section backgroundColor={'secondary'}>
           <Container>
             <div>
