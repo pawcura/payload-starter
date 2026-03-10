@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef } from 'react'
 // as well as the pathname
 import { usePathname } from 'next/navigation'
-import type { Nav, Page, Media } from '@/payload-types'
+import type { Nav, Page, Media, Setting } from '@/payload-types'
 import { isDoc } from '@/utilities/isDoc'
 import Link from 'next/link'
 import classes from './index.module.css'
@@ -17,10 +17,8 @@ export const Navigation = ({
   navItems,
   logoColor,
   logoWhite,
-}: Pick<Nav, 'navItems'> & {
-  logoColor: Media
-  logoWhite: Media
-}) => {
+  siteName,
+}: Pick<Nav, 'navItems'> & Partial<Pick<Setting, 'logoColor' | 'logoWhite'>> & { siteName?: string }) => {
   // let's initialize our state and refs, which will be used to control the menu
   const [menuOpen, setMenuOpen] = useState(false)
   const navRef = useRef<HTMLElement>(null)
@@ -99,7 +97,13 @@ export const Navigation = ({
     // starting with the nav element, which will have a ref and class name as well as an aria-label for accessibility
     <nav ref={navRef} className={navClassName} aria-label="Main navigation">
       {/* we can drop our logo component at the beginning of our nav */}
-      <Logo className={classes.logo} logoWhite={logoWhite} logoColor={logoColor} />
+      {isDoc<Media>(logoColor) && isDoc<Media>(logoWhite) ? (
+        <Logo className={classes.logo} logoWhite={logoWhite} logoColor={logoColor} />
+      ) : (
+        <Link href="/" className={classes.logo}>
+          {siteName || 'Payload Starter'}
+        </Link>
+      )}
       {/* then our hamburger menu button */}
       <button
         className={classes.hamburger} // this will take the hamburger class

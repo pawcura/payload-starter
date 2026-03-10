@@ -67,11 +67,12 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     <html lang="en">
       {settings?.gtmCode && <GoogleTagManager gtmId={settings.gtmCode} />}
       <body>
-        {navigation && settings && isDoc<Media>(settings.logoColor) && isDoc<Media>(settings.logoWhite) && (
+        {navigation && (
           <Navigation
-            logoColor={settings.logoColor}
-            logoWhite={settings.logoWhite}
+            logoColor={settings?.logoColor}
+            logoWhite={settings?.logoWhite}
             navItems={navItems}
+            siteName={settings?.siteName || process.env.SITE_NAME}
           />
         )}
         <main>{children}</main>

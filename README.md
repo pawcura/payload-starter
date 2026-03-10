@@ -65,6 +65,7 @@ The starter includes a seed script that populates your database with sample cont
 1. Visit `/admin` and create your first user
 2. On the dashboard, click **Seed Database with Sample Content**
 3. This creates: a Home page, Blog page, sample blog post, category, navigation links, and site settings
+4. Upload your logos in **Settings** — the site expects four images: `iconColor`, `iconWhite`, `logoColor`, and `logoWhite`. Until uploaded, the navigation and footer display the site name as text instead
 
 ### Option 2: Manual Setup
 
@@ -73,7 +74,7 @@ Create the following manually from the admin panel:
 1. A **Home** page with slug `home` — this is your homepage
 2. A **Blog** page with slug `blog` — this is your blog index
 3. At least one **Media** upload for featured images
-4. Update **Settings** (globals) with your site name and description
+4. Update **Settings** (globals) with your site name, description, and logos (`iconColor`, `iconWhite`, `logoColor`, `logoWhite`)
 5. Update **Navigation** (globals) with links to your pages
 
 ## Environment Variables
