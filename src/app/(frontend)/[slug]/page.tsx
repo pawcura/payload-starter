@@ -19,7 +19,6 @@ export async function generateStaticParams() {
   const {docs} = await payload.find({
     collection: 'pages',
     limit: 0,
-    // we want blog to stay dynamic, though.
     where: {
       slug: {
         not_equals: 'blog',
@@ -73,7 +72,6 @@ export default async function Page({params}: PageProps) {
   const page = await queryPageBySlug({slug})
 
   if (!page) {
-    // If this is the homepage and no page exists, show setup instructions
     if (slug === 'home') {
       return (
         <div style={{

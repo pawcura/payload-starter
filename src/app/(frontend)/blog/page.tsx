@@ -121,28 +121,30 @@ export default async function Page({ searchParams }: Props) {
           </div>
         </Container>
       </Section>
-      <Section backgroundColor={'secondary'}>
-        <Container>
-          <div>
-            <Header>More Posts</Header>
-            <CategoryFilter categories={categories.docs} currentCategory={categoryParam} />
-            <CardContainer>
-              {blogs.docs
-                .filter((post) => !post.featured)
-                .map((post) => (
-                  <Card key={post.id} {...post} />
-                ))}
-            </CardContainer>
-            <Pagination
-              totalPages={blogs.totalPages}
-              currentPage={currentPage}
-              hasPrev={blogs.hasPrevPage}
-              hasNext={blogs.hasNextPage}
-              searchParams={currentSearchParams}
-            />
-          </div>
-        </Container>
-      </Section>
+      {blogs.docs.length > 0 && (
+        <Section backgroundColor={'secondary'}>
+          <Container>
+            <div>
+              <Header>More Posts</Header>
+              <CategoryFilter categories={categories.docs} currentCategory={categoryParam} />
+              <CardContainer>
+                {blogs.docs
+                  .filter((post) => !post.featured)
+                  .map((post) => (
+                    <Card key={post.id} {...post} />
+                  ))}
+              </CardContainer>
+              <Pagination
+                totalPages={blogs.totalPages}
+                currentPage={currentPage}
+                hasPrev={blogs.hasPrevPage}
+                hasNext={blogs.hasNextPage}
+                searchParams={currentSearchParams}
+              />
+            </div>
+          </Container>
+        </Section>
+      )}
     </>
   )
 }

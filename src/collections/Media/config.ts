@@ -4,6 +4,9 @@ import { generateBlurData } from './hooks/generateBlurData'
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  access: {
+    read: () => true,
+  },
   defaultPopulate: {
     url: true,
     filename: true,

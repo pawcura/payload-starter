@@ -17,22 +17,17 @@ export function MediaImage({ image, size, flex, className, ...rest }: MediaImage
   const classNames = [classes.imageWrapper, flex && classes.flex, className]
     .filter(Boolean)
     .join(' ')
-  const src = getMediaSize(image, size).url!
-  // skip Next.js image optimization for images served through Payload's file proxy
-  // (used when no S3 public CDN URL is configured)
-  const isProxied = src.startsWith('/api/')
   return (
     // then pass in the processed class names into the outer div
     <div className={classNames} {...rest}>
       {/* remove the size strings and replace them with the size prop */}
       <Image
-        src={src}
+        src={getMediaSize(image, size).url!}
         alt={image.alt || ''}
         width={getMediaSize(image, size).width!}
         height={getMediaSize(image, size).height!}
         blurDataURL={image.blurDataUrl!}
         placeholder="blur"
-        unoptimized={isProxied}
       />
     </div>
   )

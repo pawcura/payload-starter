@@ -91,7 +91,7 @@ Create the following manually from the admin panel:
 | `S3_BUCKET` | Yes | S3 bucket name |
 | `S3_ACCESS_KEY_ID` | Yes | S3 access key |
 | `S3_SECRET_ACCESS_KEY` | Yes | S3 secret key |
-| `S3_PUBLIC_URL` | No | Public CDN URL for media (e.g. `https://your-bucket.r2.dev`). If not set, media is served through the app via `/api/media/file/` without Next.js image optimization |
+| `S3_PUBLIC_URL` | No | Public CDN URL for media (e.g. `https://your-bucket.r2.dev`). If not set, media is served through the app via `/api/media/file/` |
 | `RESEND_API_KEY` | No | Resend API key — email features are disabled if not set |
 | `EMAIL_FROM_ADDRESS` | No | Sender email address (default: `noreply@example.com`) |
 | `EMAIL_FROM_NAME` | No | Sender name (default: value of `SITE_NAME`) |
@@ -117,7 +117,7 @@ S3_PUBLIC_URL=https://pub-<hash>.r2.dev
 
 > **Note:** Existing media uploaded to Railway's bucket will not be migrated automatically. Upload new media after switching.
 
-> **Why switch?** Railway's object storage buckets are private, so images are served through Payload's file proxy without Next.js image optimization. Setting `S3_PUBLIC_URL` with a publicly accessible bucket (like R2) enables direct image serving with Next.js optimization.
+> **Why switch?** Railway's object storage works out of the box, but a CDN like R2 provides faster image delivery by serving media directly from edge locations instead of proxying through the app.
 
 ## Email (Optional)
 

@@ -33,7 +33,7 @@ export const Footer = ({ navItems, logoColor, logoWhite }: FooterProps) => {
                 return (
                   <Link
                     key={link.id}
-                    href={`/${link.slug}`}
+                    href={link.slug === 'home' ? '/' : `/${link.slug}`}
                     className={classes.navLink}
                     role={'menuitem'}
                   >

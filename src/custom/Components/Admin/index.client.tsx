@@ -17,5 +17,5 @@ export default function Graphic({
 
   const { width, alt, height, url } = selectedGraphic as Media
 
-  return <Image width={width!} height={height!} src={url!} alt={alt} unoptimized={url!.startsWith('/api/')} />
+  return <Image width={width!} height={height!} src={url!} alt={alt} />
 }

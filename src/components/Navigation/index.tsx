@@ -130,7 +130,7 @@ export const Navigation = ({
               <Link
                 className={classes.navItem}
                 key={link.id}
-                href={`/${link.slug}`}
+                href={link.slug === 'home' ? '/' : `/${link.slug}`}
                 role="menuitem"
                 onClick={() => setMenuOpen(false)}
               >
