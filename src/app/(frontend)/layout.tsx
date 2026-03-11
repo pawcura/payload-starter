@@ -19,12 +19,15 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'),
     title: {
       default: settings?.siteName || process.env.SITE_NAME || 'Payload Starter',
       template: `%s | ${settings?.siteName || process.env.SITE_NAME || 'Payload Starter'}`,
     },
     description:
-      settings?.siteDescription || process.env.SITE_DESCRIPTION || 'A Payload CMS starter template.',
+      settings?.siteDescription ||
+      process.env.SITE_DESCRIPTION ||
+      'A Payload CMS starter template.',
     icons: [
       {
         url: '/pe-icon.png',
