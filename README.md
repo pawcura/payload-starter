@@ -1,12 +1,12 @@
 # Payload Starter
 
-A production-ready starter template built with [Payload CMS](https://payloadcms.com), Next.js, MongoDB, and S3-compatible storage.
+A production-ready starter template built with [Payload](https://payloadcms.com), Next.js, MongoDB, and S3-compatible storage.
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/PLACEHOLDER)
 
 ## Features
 
-- **Payload CMS 3** with Next.js App Router
+- **Payload 3** with Next.js 15 App Router
 - **Pages** with configurable block-based layouts (Hero, Text, Text & Image, Cards)
 - **Blog** with categories, featured posts, pagination, and related posts
 - **SEO** fields with auto-generated meta tags, Open Graph, sitemaps, and canonical URLs
@@ -32,13 +32,13 @@ After deployment, visit `/admin` to create your first user, then click **Seed Da
 - Node.js 18.20+ or 20.9+
 - pnpm 9 or 10
 - MongoDB (local or remote)
-- An S3-compatible bucket (Cloudflare R2, AWS S3, MinIO, etc.)
+- An S3-compatible bucket (Cloudflare R2, AWS S3, MinIO, Railway Buckets, etc.)
 
 ### Setup
 
 ```bash
 # Clone the repo
-git clone <your-repo-url>
+git clone https://github.com/nlvcodes/payload-starter.git
 cd payload-starter
 
 # Install dependencies
@@ -59,6 +59,7 @@ Visit `http://localhost:3000/admin` to create your first user.
 ## Seeding the Database
 
 The starter includes a seed script that populates your database with sample content so the site works out of the box. Without seeding, the homepage shows a "Go to Admin Panel" message and the blog returns a 404 (it requires a page with slug `blog`).
+If you want your blog to be called something else, you can simply rename the `blog` page. The seeded navigation just includes a `blog` page by default.
 
 ### Option 1: One-Click Seed (Recommended)
 
@@ -113,6 +114,8 @@ S3_SECRET_ACCESS_KEY=your-r2-secret-key
 S3_PUBLIC_URL=https://pub-<hash>.r2.dev
 ```
 
+Your `S3_PUBLIC_URL` can also be a custom domain, such as `https://images.yourdomain.com`.
+
 5. Redeploy your application
 
 > **Note:** Existing media uploaded to Railway's bucket will not be migrated automatically. Upload new media after switching.
@@ -145,7 +148,7 @@ The `public/` folder includes placeholder images you should replace with your ow
 
 ## Block Preview Images
 
-The admin block picker shows preview thumbnails stored in `public/blocks/`. You can replace these with your own 480x320 `.webp` images to match your design:
+The admin block picker shows preview thumbnails stored in `public/blocks/`. You can replace these with your own 480x320 images to match your design:
 
 - `public/blocks/hero-block-480x320.webp`
 - `public/blocks/text-block-480x320.webp`
