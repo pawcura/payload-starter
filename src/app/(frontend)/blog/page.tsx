@@ -1,6 +1,7 @@
 // @/app/(frontend)/blog/page.tsx
 import { type PaginatedDocs } from 'payload'
 import type { Category, Page as PageType } from '@/payload-types'
+import { PUBLIC_WORKFLOW_STATUSES } from '@/collections/Posts/workflow/states'
 import React from 'react'
 import { notFound } from 'next/navigation'
 import { isDoc } from '@/utilities/isDoc'
@@ -210,9 +211,11 @@ const queryFeaturedBlog = unstable_cache(
       collection: 'posts',
       limit: 1,
       where: {
-        featured: {
-          equals: true,
-        },
+        and: [
+          { featured: { equals: true } },
+          { _status: { equals: 'published' } },
+          { workflowStatus: { in: PUBLIC_WORKFLOW_STATUSES } },
+        ],
       },
       populate: {
         categories: {
@@ -256,13 +259,15 @@ const queryBlogs = unstable_cache(
       collection: 'posts',
       limit: 8,
       page: currentPage,
-      ...(categoryParam && {
-        where: {
-          'category.slug': {
-            equals: categoryParam,
-          },
-        },
-      }),
+      where: {
+        and: [
+          { _status: { equals: 'published' } },
+          { workflowStatus: { in: PUBLIC_WORKFLOW_STATUSES } },
+          ...(categoryParam
+            ? [{ 'categories.slug': { equals: categoryParam } }]
+            : []),
+        ],
+      },
       populate: {
         categories: {
           name: true,

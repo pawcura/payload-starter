@@ -7,7 +7,11 @@ import { MediaImage } from '@/components/MediaImage'
 // we'll import our classes from the css module
 import classes from './index.module.css'
 import { Header } from '@/components/Header'
-import { Calendar, Tag, User2 } from 'lucide-react'
+import { BadgeCheck, Calendar, Tag, User2 } from 'lucide-react'
+import {
+  WORKFLOW_STATUS_LABEL,
+  type WorkflowStatus,
+} from '@/collections/Posts/workflow/states'
 
 // we'll create a type for our card variant
 // do I need to export this?
@@ -15,7 +19,15 @@ export type CardVariant = 'default' | 'compact'
 
 type cardProps = Pick<
   Post,
-  'id' | 'slug' | 'featuredImage' | 'title' | 'populatedAuthor' | 'date' | 'date_tz' | 'category'
+  | 'id'
+  | 'slug'
+  | 'featuredImage'
+  | 'title'
+  | 'populatedAuthor'
+  | 'date'
+  | 'date_tz'
+  | 'categories'
+  | 'workflowStatus'
 > &
   // we also need to add the optional variant and class name types
   {
@@ -28,6 +40,15 @@ export const Card = ({ variant = 'default', className, ...post }: cardProps) => 
   // let's process our class names
   const cardClasses = [classes.link, classes.card, classes[variant], className].filter(Boolean).join(' ')
 
+  // The first category in the list is the primary category
+  const primaryCategory = Array.isArray(post.categories) ? post.categories[0] : undefined
+
+  // Surface the editorial workflow status. On the public site this is
+  // effectively always "Published" (other statuses are filtered out by the
+  // blog queries), but rendering it explicitly reinforces trust and lets
+  // admin/preview routes reuse the same card.
+  const workflowStatus = (post.workflowStatus ?? null) as WorkflowStatus | null
+
   return (
     // if key is here, remove it and change to an article
     <Link
@@ -39,16 +60,24 @@ export const Card = ({ variant = 'default', className, ...post }: cardProps) => 
       <article>
         {isDoc<Media>(post.featuredImage) && (
           <div className={classes.imageWrapper}>
-            {/* in our imageWrapper, we'll check our variant and return the category if it exists */}
-            {variant === 'default' && isDoc<Category>(post.category) && (
+            {/* in our imageWrapper, we'll check our variant and return the primary category if it exists */}
+            {variant === 'default' && isDoc<Category>(primaryCategory) && (
               <span className={classes.categoryBadge}>
-                <Tag height={16} width={16} /> {post.category.name}
+                <Tag height={16} width={16} /> {primaryCategory.name}
               </span>
             )}
             <MediaImage image={post.featuredImage} size="card" />
           </div>
         )}
         <div className={classes.content}>
+          {workflowStatus && (
+            <span
+              className={`${classes.statusBadge} ${classes[`status_${workflowStatus.replace('-', '_')}`] ?? ''}`}
+            >
+              <BadgeCheck height={14} width={14} />
+              {WORKFLOW_STATUS_LABEL[workflowStatus]}
+            </span>
+          )}
           <Header as={'h3'} align={'left'}>
             {post.title}
           </Header>

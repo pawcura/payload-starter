@@ -9,7 +9,10 @@ import { seoPlugin } from '@payloadcms/plugin-seo'
 import { resendAdapter } from '@payloadcms/email-resend'
 
 import { seedEndpoint } from './seed'
+import { schedulePublishEndpoint } from './endpoints/schedulePublish'
+import { importMarkdownEndpoint } from './endpoints/importMarkdown'
 import { Users } from './collections/Users/config'
+import { Doctors } from './collections/Doctors/config'
 import { Media } from './collections/Media/config'
 import { Pages } from '@/collections/Pages/config'
 import { Posts } from '@/collections/Posts/config'
@@ -69,9 +72,36 @@ export default buildConfig({
   },
   defaultDepth: 2,
   blocks: [Hero, TextAndImage, Cards, Text],
-  collections: [Users, Media, Pages, Posts, Categories],
-  endpoints: [seedEndpoint],
+  collections: [Users, Doctors, Media, Pages, Posts, Categories],
+  endpoints: [seedEndpoint, schedulePublishEndpoint, importMarkdownEndpoint],
   globals: [Settings, Navigation],
+  jobs: {
+    tasks: [
+      {
+        // Custom task fired by the /api/schedule-publish endpoint. At the
+        // scheduled time it transitions the post's workflowStatus to
+        // 'published' (and syncs _status) using the disableWorkflow context
+        // flag so the role-gated transition check is bypassed for this
+        // trusted server-side flow.
+        slug: 'workflowSchedulePublish',
+        inputSchema: [{ name: 'postId', type: 'text', required: true }],
+        handler: async ({ input, req }) => {
+          const { postId } = input as { postId: string }
+          await req.payload.update({
+            collection: 'posts',
+            id: postId,
+            context: { disableWorkflow: true },
+            req,
+            data: {
+              workflowStatus: 'published',
+              _status: 'published',
+            },
+          })
+          return { output: {} }
+        },
+      },
+    ],
+  },
   ...(process.env.RESEND_API_KEY
     ? {
         email: resendAdapter({

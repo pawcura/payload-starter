@@ -29,6 +29,9 @@ export async function generateStaticParams() {
   const { docs } = await payload.find({
     collection: 'posts',
     limit: 0,
+    where: {
+      _status: { equals: 'published' },
+    },
   })
 
   return docs.map((doc) => ({ slug: doc.slug }))
@@ -42,7 +45,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .find({
       collection: 'posts',
       limit: 1,
-      where: { slug: { equals: slug } },
+      where: {
+        and: [
+          { slug: { equals: slug } },
+          { _status: { equals: 'published' } },
+        ],
+      },
       populate: {
         media: {
           sizes: {
@@ -128,9 +136,10 @@ const queryPost = unstable_cache(
       collection: 'posts',
       limit: 1,
       where: {
-        slug: {
-          equals: slug,
-        },
+        and: [
+          { slug: { equals: slug } },
+          { _status: { equals: 'published' } },
+        ],
       },
       populate: {
         categories: {
@@ -161,8 +170,19 @@ const queryPost = unstable_cache(
 ) as ({ slug }: { slug: string }) => Promise<Post | null>
 
 const queryRelatedPosts = unstable_cache(
-  async ({ post }: { post: Pick<Post, 'slug' | 'category'> }) => {
+  async ({ post }: { post: Pick<Post, 'slug' | 'categories'> }) => {
     const payload = await getPayloadClient()
+
+    // Use the primary (first) category to find related posts.
+    // For a hasMany relationship, `equals` matches any post that contains this category.
+    const primaryCategory = Array.isArray(post.categories) ? post.categories[0] : undefined
+    const primaryCategoryId =
+      primaryCategory && typeof primaryCategory === 'object' ? primaryCategory.id : primaryCategory
+
+    if (!primaryCategoryId) {
+      return { docs: [], totalDocs: 0, totalPages: 0, page: 1, pagingCounter: 1, hasPrevPage: false, hasNextPage: false, prevPage: null, nextPage: null, limit: 4 } as unknown as PaginatedDocs<Post>
+    }
+
     return await payload.find({
       collection: 'posts',
       limit: 4,
@@ -170,8 +190,11 @@ const queryRelatedPosts = unstable_cache(
         slug: {
           not_equals: post.slug,
         },
-        category: {
-          equals: post.category,
+        categories: {
+          equals: primaryCategoryId,
+        },
+        _status: {
+          equals: 'published',
         },
       },
       populate: {
@@ -201,10 +224,10 @@ const queryRelatedPosts = unstable_cache(
   {
     tags: ['blog'],
   },
-) as ({ post }: { post: Pick<Post, 'slug' | 'category'> }) => Promise<PaginatedDocs<Post>>
+) as ({ post }: { post: Pick<Post, 'slug' | 'categories'> }) => Promise<PaginatedDocs<Post>>
 
 const queryPreviousPost = unstable_cache(
-  async ({ post }: { post: Pick<Post, 'slug' | 'category' | 'date' | 'createdAt'> }) => {
+  async ({ post }: { post: Pick<Post, 'slug' | 'categories' | 'date' | 'createdAt'> }) => {
     const payload = await getPayloadClient()
     const previousPost = await payload.find({
       collection: 'posts',
@@ -212,6 +235,9 @@ const queryPreviousPost = unstable_cache(
       where: {
         slug: {
           not_equals: post.slug,
+        },
+        _status: {
+          equals: 'published',
         },
         or: [
           {
@@ -250,11 +276,11 @@ const queryPreviousPost = unstable_cache(
 ) as ({
   post,
 }: {
-  post: Pick<Post, 'slug' | 'category' | 'date' | 'createdAt'>
+  post: Pick<Post, 'slug' | 'categories' | 'date' | 'createdAt'>
 }) => Promise<Post | null>
 
 const queryNextPost = unstable_cache(
-  async ({ post }: { post: Pick<Post, 'slug' | 'category' | 'date' | 'createdAt'> }) => {
+  async ({ post }: { post: Pick<Post, 'slug' | 'categories' | 'date' | 'createdAt'> }) => {
     const payload = await getPayloadClient()
     const nextPost = await payload.find({
       collection: 'posts',
@@ -262,6 +288,9 @@ const queryNextPost = unstable_cache(
       where: {
         slug: {
           not_equals: post.slug,
+        },
+        _status: {
+          equals: 'published',
         },
         or: [
           {
@@ -300,5 +329,5 @@ const queryNextPost = unstable_cache(
 ) as ({
   post,
 }: {
-  post: Pick<Post, 'slug' | 'category' | 'date' | 'createdAt'>
+  post: Pick<Post, 'slug' | 'categories' | 'date' | 'createdAt'>
 }) => Promise<Post | null>

@@ -60,6 +60,7 @@ export const seedEndpoint: Endpoint = {
           title: 'Home',
           slug: 'home',
           featuredImage: media.id,
+          _status: 'published',
           blocks: [
             {
               blockType: 'hero',
@@ -78,14 +79,19 @@ export const seedEndpoint: Endpoint = {
           title: 'Blog',
           slug: 'blog',
           featuredImage: media.id,
+          _status: 'published',
           blocks: [],
         },
         req,
       })
 
-      // Create a sample blog post
+      // Create a sample blog post. We push it all the way through the
+      // editorial workflow ("published") and pass the disableWorkflow
+      // context flag so the seed isn't blocked by role-based transition
+      // validation in workflowTransition.ts.
       await payload.create({
         collection: 'posts',
+        context: { disableWorkflow: true },
         data: {
           title: 'Your First Post',
           slug: 'your-first-post',
@@ -93,8 +99,10 @@ export const seedEndpoint: Endpoint = {
           featured: true,
           date: new Date().toISOString(),
           author: req.user.id,
-          category: category.id,
+          categories: [category.id],
           featuredImage: media.id,
+          workflowStatus: 'published',
+          _status: 'published',
           body: {
             root: {
               type: 'root',

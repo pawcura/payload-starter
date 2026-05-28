@@ -17,7 +17,7 @@ export const Categories: CollectionConfig = {
     {
       type: 'join',
       collection: 'posts',
-      on: 'category',
+      on: 'categories',
       name: 'relatedPosts'
     }
   ],

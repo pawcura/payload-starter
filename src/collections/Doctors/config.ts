@@ -1,19 +1,20 @@
 import { type CollectionConfig, slugField } from 'payload'
 
-export const Users: CollectionConfig = {
-  slug: 'users',
+export const Doctors: CollectionConfig = {
+  slug: 'doctors',
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'slug', 'email', 'role', 'updatedAt'],
+    defaultColumns: ['name', 'slug', 'specialty', 'updatedAt'],
+    description:
+      'Public-facing doctor profiles. Mirrors the user profile fields and adds medical credentials. Doctors do not log in — reference them from posts for medical-review attribution.',
   },
   defaultPopulate: {
     name: true,
-    email: true,
     slug: true,
     profilePic: true,
-    role: true,
+    specialty: true,
+    qualifications: true,
   },
-  auth: true,
   fields: [
     {
       type: 'text',
@@ -24,28 +25,12 @@ export const Users: CollectionConfig = {
       useAsSlug: 'name',
     }),
     {
-      name: 'role',
-      type: 'select',
-      required: true,
-      defaultValue: 'author',
-      options: [
-        { label: 'Author', value: 'author' },
-        { label: 'Reviewer', value: 'reviewer' },
-        { label: 'Compliance Reviewer', value: 'compliance-reviewer' },
-        { label: 'Approver', value: 'approver' },
-        { label: 'Admin', value: 'admin' },
-      ],
-      admin: {
-        description: 'Determines what the user is permitted to do across the workflow.',
-      },
-    },
-    {
       name: 'profilePic',
       type: 'upload',
       relationTo: 'media',
       required: false,
       admin: {
-        description: 'Optional profile picture for the user.',
+        description: 'Optional profile picture for the doctor.',
       },
     },
     {
@@ -66,6 +51,69 @@ export const Users: CollectionConfig = {
       admin: {
         description: 'A short biography to display on the public profile.',
       },
+    },
+    {
+      type: 'collapsible',
+      label: 'Medical Credentials',
+      admin: {
+        description: 'Professional details displayed alongside reviewed content.',
+        initCollapsed: false,
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'specialty',
+              type: 'text',
+              label: 'Specialty',
+              required: false,
+              admin: {
+                placeholder: 'e.g. Cardiology, Dermatology',
+              },
+            },
+            {
+              name: 'yearsOfExperience',
+              type: 'number',
+              label: 'Years of Experience',
+              required: false,
+              min: 0,
+              admin: {
+                step: 1,
+              },
+            },
+          ],
+        },
+        {
+          name: 'qualifications',
+          type: 'textarea',
+          label: 'Qualifications',
+          required: false,
+          admin: {
+            description: 'Degrees, fellowships, certifications (one per line).',
+          },
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'registrationNumber',
+              type: 'text',
+              label: 'Medical Registration Number',
+              required: false,
+              admin: {
+                description: 'Council / board registration number, if applicable.',
+              },
+            },
+            {
+              name: 'hospitalAffiliation',
+              type: 'text',
+              label: 'Hospital / Clinic Affiliation',
+              required: false,
+            },
+          ],
+        },
+      ],
     },
     {
       type: 'collapsible',
@@ -116,7 +164,7 @@ export const Users: CollectionConfig = {
               label: 'Public Email',
               required: false,
               admin: {
-                description: 'Email shown publicly. Separate from the login email.',
+                description: 'Email shown publicly on the doctor profile.',
               },
             },
           ],
