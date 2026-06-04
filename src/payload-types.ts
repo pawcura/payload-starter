@@ -73,11 +73,13 @@ export interface Config {
   };
   collections: {
     users: User;
+    doctors: Doctor;
     media: Media;
     pages: Page;
     posts: Post;
     categories: Category;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -89,11 +91,13 @@ export interface Config {
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    doctors: DoctorsSelect<false> | DoctorsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -115,7 +119,14 @@ export interface Config {
     collection: 'users';
   };
   jobs: {
-    tasks: unknown;
+    tasks: {
+      workflowSchedulePublish: TaskWorkflowSchedulePublish;
+      schedulePublish: TaskSchedulePublish;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -177,9 +188,26 @@ export interface Page {
      * Add this page to the sitemap
      */
     addToSitemap?: boolean | null;
+    /**
+     * Structured data (schema.org JSON-LD). Auto-populated by Import Markdown when a ```json block with "@context": "https://schema.org" is present. Rendered as <script type="application/ld+json"> on the public page.
+     */
+    schema?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    /**
+     * SHA-256 of the schema JSON at the moment the editor clicked "Verify Schema". The publish gate on Posts requires this to match the current schema hash; any edit invalidates verification automatically.
+     */
+    schemaVerifiedHash?: string | null;
   };
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -332,6 +360,31 @@ export interface TextBlockProps {
 export interface User {
   id: string;
   name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  /**
+   * Determines what the user is permitted to do across the workflow.
+   */
+  role: 'author' | 'reviewer' | 'compliance-reviewer' | 'approver' | 'admin';
+  /**
+   * Optional profile picture for the user.
+   */
+  profilePic?: (string | null) | Media;
+  gender?: ('male' | 'female' | 'non-binary' | 'prefer-not-to-say') | null;
+  /**
+   * A short biography to display on the public profile.
+   */
+  bio?: string | null;
+  facebook?: string | null;
+  instagram?: string | null;
+  twitter?: string | null;
+  /**
+   * Email shown publicly. Separate from the login email.
+   */
+  publicEmail?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -351,6 +404,50 @@ export interface User {
   password?: string | null;
 }
 /**
+ * Public-facing doctor profiles. Mirrors the user profile fields and adds medical credentials. Doctors do not log in — reference them from posts for medical-review attribution.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "doctors".
+ */
+export interface Doctor {
+  id: string;
+  name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  /**
+   * Optional profile picture for the doctor.
+   */
+  profilePic?: (string | null) | Media;
+  gender?: ('male' | 'female' | 'non-binary' | 'prefer-not-to-say') | null;
+  /**
+   * A short biography to display on the public profile.
+   */
+  bio?: string | null;
+  specialty?: string | null;
+  yearsOfExperience?: number | null;
+  /**
+   * Degrees, fellowships, certifications (one per line).
+   */
+  qualifications?: string | null;
+  /**
+   * Council / board registration number, if applicable.
+   */
+  registrationNumber?: string | null;
+  hospitalAffiliation?: string | null;
+  facebook?: string | null;
+  instagram?: string | null;
+  twitter?: string | null;
+  /**
+   * Email shown publicly on the doctor profile.
+   */
+  publicEmail?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
@@ -361,13 +458,20 @@ export interface Post {
    */
   generateSlug?: boolean | null;
   slug: string;
+  /**
+   * Editorial workflow: Draft → Submitted for Review → Compliance Review → Approved → Published. Status changes only via the workflow action buttons.
+   */
+  workflowStatus: 'draft' | 'in-review' | 'compliance-review' | 'approved' | 'published';
   title: string;
   summary?: string | null;
   featured?: boolean | null;
   date?: string | null;
   date_tz?: SupportedTimezones;
   author: string | User;
-  category?: (string | null) | Category;
+  /**
+   * Add one or more categories. Drag to reorder — the first category is treated as the primary category.
+   */
+  categories?: (string | Category)[] | null;
   featuredImage: string | Media;
   populatedAuthor?: {
     id?: string | null;
@@ -400,9 +504,26 @@ export interface Post {
      * Add this page to the sitemap
      */
     addToSitemap?: boolean | null;
+    /**
+     * Structured data (schema.org JSON-LD). Auto-populated by Import Markdown when a ```json block with "@context": "https://schema.org" is present. Rendered as <script type="application/ld+json"> on the public page.
+     */
+    schema?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    /**
+     * SHA-256 of the schema JSON at the moment the editor clicked "Verify Schema". The publish gate on Posts requires this to match the current schema hash; any edit invalidates verification automatically.
+     */
+    schemaVerifiedHash?: string | null;
   };
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -443,6 +564,98 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: string;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'workflowSchedulePublish' | 'schedulePublish';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'workflowSchedulePublish' | 'schedulePublish') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -451,6 +664,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'doctors';
+        value: string | Doctor;
       } | null)
     | ({
         relationTo: 'media';
@@ -516,6 +733,16 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  generateSlug?: T;
+  slug?: T;
+  role?: T;
+  profilePic?: T;
+  gender?: T;
+  bio?: T;
+  facebook?: T;
+  instagram?: T;
+  twitter?: T;
+  publicEmail?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -532,6 +759,29 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "doctors_select".
+ */
+export interface DoctorsSelect<T extends boolean = true> {
+  name?: T;
+  generateSlug?: T;
+  slug?: T;
+  profilePic?: T;
+  gender?: T;
+  bio?: T;
+  specialty?: T;
+  yearsOfExperience?: T;
+  qualifications?: T;
+  registrationNumber?: T;
+  hospitalAffiliation?: T;
+  facebook?: T;
+  instagram?: T;
+  twitter?: T;
+  publicEmail?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -614,9 +864,12 @@ export interface PagesSelect<T extends boolean = true> {
         image?: T;
         canonicalUrl?: T;
         addToSitemap?: T;
+        schema?: T;
+        schemaVerifiedHash?: T;
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -625,13 +878,14 @@ export interface PagesSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   generateSlug?: T;
   slug?: T;
+  workflowStatus?: T;
   title?: T;
   summary?: T;
   featured?: T;
   date?: T;
   date_tz?: T;
   author?: T;
-  category?: T;
+  categories?: T;
   featuredImage?: T;
   populatedAuthor?:
     | T
@@ -648,9 +902,12 @@ export interface PostsSelect<T extends boolean = true> {
         image?: T;
         canonicalUrl?: T;
         addToSitemap?: T;
+        schema?: T;
+        schemaVerifiedHash?: T;
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -671,6 +928,37 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -768,6 +1056,38 @@ export interface NavSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskWorkflowSchedulePublish".
+ */
+export interface TaskWorkflowSchedulePublish {
+  input: {
+    postId: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSchedulePublish".
+ */
+export interface TaskSchedulePublish {
+  input: {
+    type?: ('publish' | 'unpublish') | null;
+    locale?: string | null;
+    doc?:
+      | ({
+          relationTo: 'pages';
+          value: string | Page;
+        } | null)
+      | ({
+          relationTo: 'posts';
+          value: string | Post;
+        } | null);
+    global?: string | null;
+    user?: (string | null) | User;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

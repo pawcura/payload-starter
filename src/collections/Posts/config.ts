@@ -1,28 +1,85 @@
 // @/collections/Posts/config.ts
 import { type CollectionConfig, slugField } from 'payload'
-import { FixedToolbarFeature, lexicalEditor, BlocksFeature } from '@payloadcms/richtext-lexical'
 import { SEOField } from '@/fields/seo/config'
 import { Post } from '@/payload-types'
 import { deletePost, updatePost } from './hooks/revalidatePost'
 import { populateAuthor } from './hooks/populateAuthor'
+import { workflowTransition } from './hooks/workflowTransition'
+import { sendWorkflowEmails } from './hooks/sendWorkflowEmails'
+import { postsBodyEditor } from './bodyEditor'
+import {
+  WORKFLOW_STATUS_OPTIONS,
+  type WorkflowStatus,
+} from './workflow/states'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
   admin: {
     useAsTitle: 'title',
     hideAPIURL: process.env.NODE_ENV !== 'development',
+    defaultColumns: ['title', 'workflowStatus', 'author', 'date', 'updatedAt'],
+    components: {
+      edit: {
+        // Replace Payload's built-in "Publish Changes" button with our
+        // role-aware workflow transition buttons.
+        PublishButton:
+          '@/custom/Components/Admin/WorkflowActionButtons.tsx#WorkflowActionButtons',
+      },
+    },
+  },
+  versions: {
+    drafts: {
+      autosave: {
+        interval: 375,
+      },
+      schedulePublish: true,
+    },
+    maxPerDoc: 25,
   },
   defaultPopulate: {
     slug: true,
     title: true,
+    workflowStatus: true,
   },
   hooks: {
-    afterChange: [updatePost],
+    beforeChange: [workflowTransition],
+    afterChange: [updatePost, sendWorkflowEmails],
     afterDelete: [deletePost],
     afterRead: [populateAuthor],
   },
   fields: [
     slugField({ useAsSlug: 'title' }),
+    {
+      name: 'workflowStatus',
+      type: 'select',
+      required: true,
+      defaultValue: 'draft' satisfies WorkflowStatus,
+      options: WORKFLOW_STATUS_OPTIONS,
+      admin: {
+        position: 'sidebar',
+        // readOnly hides the default select input from every admin role.
+        // The value can still be set via the API (which is what the
+        // WorkflowActionButtons component does on transition), and the
+        // beforeChange hook is the real authority on which transitions
+        // are legal.
+        readOnly: true,
+        description:
+          'Editorial workflow: Draft → Submitted for Review → Compliance Review → Approved → Published. Status changes only via the workflow action buttons.',
+        components: {
+          // Replace the default Select input with a colored read-only badge
+          // so the field is purely informational in the edit view.
+          Field: '@/custom/Components/Admin/WorkflowStatusField.tsx#WorkflowStatusField',
+          Cell: '@/custom/Components/Admin/WorkflowStatusCell.tsx#WorkflowStatusCell',
+        },
+      },
+      access: {
+        // The field is read-only in the UI, but the API must still accept
+        // updates so the workflow buttons can drive transitions. The
+        // beforeChange hook validates role-gated transitions and rejects
+        // illegal moves (including direct REST API calls).
+        update: ({ req: { user } }) => Boolean(user),
+      },
+    },
     {
       type: 'tabs',
       tabs: [
@@ -79,8 +136,14 @@ export const Posts: CollectionConfig = {
             },
             {
               type: 'relationship',
-              name: 'category',
+              name: 'categories',
+              label: 'Categories',
               relationTo: 'categories',
+              hasMany: true,
+              admin: {
+                description:
+                  'Add one or more categories. Drag to reorder — the first category is treated as the primary category.',
+              },
             },
             {
               name: 'featuredImage',
@@ -110,18 +173,24 @@ export const Posts: CollectionConfig = {
           label: 'Content',
           fields: [
             {
+              // Renders the "Import Markdown" button + drawer above the body
+              // field. The component dispatches updates to `title`, `summary`,
+              // `body`, `meta.title` and `meta.description` after the server
+              // converts the pasted markdown into a Lexical editor state.
+              name: 'importMarkdown',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field:
+                    '@/custom/Components/Admin/ImportMarkdownButton.tsx#ImportMarkdownButton',
+                },
+              },
+            },
+            {
               type: 'richText',
               name: 'body',
               required: true,
-              editor: lexicalEditor({
-                features: ({ defaultFeatures }) => [
-                  ...defaultFeatures,
-                  FixedToolbarFeature(),
-                  BlocksFeature({
-                    blocks: ['textAndImage', 'cards'],
-                  }),
-                ],
-              }),
+              editor: postsBodyEditor,
             },
           ],
         },

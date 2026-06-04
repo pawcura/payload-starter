@@ -19,7 +19,7 @@ type PostPreviewProps = {
     | 'populatedAuthor'
     | 'date'
     | 'date_tz'
-    | 'category'
+    | 'categories'
   >
   // we'll want an optional variant and showLink prop to control the flow and function of the component
   variant?: 'featured' | 'header'
@@ -40,7 +40,10 @@ export function PostPreview({
   className,
 }: PostPreviewProps) {
   // we'll destructure our post
-  const { featuredImage, populatedAuthor: author, date, date_tz, category, title, summary, slug } = post
+  const { featuredImage, populatedAuthor: author, date, date_tz, categories, title, summary, slug } = post
+
+  // The first category in the list is the primary category
+  const primaryCategory = Array.isArray(categories) ? categories[0] : undefined
 
   // and process our class names
   const classNames = [classes.header, className].filter(Boolean).join(' ')
@@ -70,9 +73,9 @@ export function PostPreview({
               <User2 height={16} width={16} /> {author.name}
             </span>
           )}
-          {isDoc<Category>(category) && (
+          {isDoc<Category>(primaryCategory) && (
             <span className={classes.iconContainer}>
-              <Tag height={16} width={16} /> {category.name}
+              <Tag height={16} width={16} /> {primaryCategory.name}
             </span>
           )}
           {date && (

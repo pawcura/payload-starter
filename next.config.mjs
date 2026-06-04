@@ -1,4 +1,8 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const s3PublicUrl = process.env.S3_PUBLIC_URL || ''
 
@@ -8,7 +12,8 @@ const urls = s3PublicUrl
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Your Next.js config here
+  // Pin the workspace root so Next.js doesn't pick up stray lockfiles in parent dirs
+  outputFileTracingRoot: __dirname,
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],

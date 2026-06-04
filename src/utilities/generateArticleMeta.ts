@@ -26,11 +26,9 @@ export const generateArticleMeta = async (args: {
   // and extract author name
   const authorName = isDoc<User>(post.populatedAuthor) ? post.populatedAuthor.name : undefined
 
-  // then get the category name
-  const categoryName =
-    isDoc<Category>(post.category) && post.category
-      ? post.category.name
-      : undefined
+  // then get the primary (first) category name
+  const primaryCategory = Array.isArray(post.categories) ? post.categories[0] : undefined
+  const categoryName = isDoc<Category>(primaryCategory) ? primaryCategory.name : undefined
 
   // now return the metadata object with the updated open graph properties from our article
   return {

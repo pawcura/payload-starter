@@ -7,6 +7,16 @@ export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
     useAsTitle: 'title',
+    defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
+  },
+  versions: {
+    drafts: {
+      autosave: {
+        interval: 375,
+      },
+      schedulePublish: true,
+    },
+    maxPerDoc: 25,
   },
   defaultPopulate: {
     slug: true,

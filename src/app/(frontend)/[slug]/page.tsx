@@ -20,10 +20,11 @@ export async function generateStaticParams() {
     collection: 'pages',
     limit: 0,
     where: {
-      slug: {
-        not_equals: 'blog',
-      }
-    }
+      and: [
+        { slug: { not_equals: 'blog' } },
+        { _status: { equals: 'published' } },
+      ],
+    },
   })
 
   return docs.map(doc => ({slug: doc.slug}))
@@ -38,7 +39,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .find({
       collection: 'pages',
       limit: 1,
-      where: { slug: { equals: slug } },
+      where: {
+        and: [
+          { slug: { equals: slug } },
+          { _status: { equals: 'published' } },
+        ],
+      },
       // we need the open graph image
       populate: {
         media: {
@@ -121,9 +127,10 @@ const queryPageBySlug = unstable_cache(async ({ slug }: { slug: string }) => {
     collection: 'pages',
     limit: 1,
     where: {
-      slug: {
-        equals: slug,
-      },
+      and: [
+        { slug: { equals: slug } },
+        { _status: { equals: 'published' } },
+      ],
     },
     populate: {
       media: {
