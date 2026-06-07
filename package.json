@@ -58,12 +58,5 @@
   },
   "overrides": {
     "@img/sharp-libvips-darwin-arm64": "1.2.4"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp",
-      "esbuild",
-      "unrs-resolver"
-    ]
   }
 }
