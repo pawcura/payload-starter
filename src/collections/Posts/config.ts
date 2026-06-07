@@ -1,5 +1,5 @@
 // @/collections/Posts/config.ts
-import { type CollectionConfig, slugField } from 'payload'
+import { type CollectionConfig, type Where, slugField } from 'payload'
 import { SEOField } from '@/fields/seo/config'
 import { Post } from '@/payload-types'
 import { deletePost, updatePost } from './hooks/revalidatePost'
@@ -7,13 +7,29 @@ import { populateAuthor } from './hooks/populateAuthor'
 import { workflowTransition } from './hooks/workflowTransition'
 import { sendWorkflowEmails } from './hooks/sendWorkflowEmails'
 import { postsBodyEditor } from './bodyEditor'
+import { canReadCmsContent } from '@/utilities/cmsReadApiKey'
 import {
+  PUBLIC_WORKFLOW_STATUSES,
   WORKFLOW_STATUS_OPTIONS,
   type WorkflowStatus,
 } from './workflow/states'
 
+const publishedPostsWhere: Where = {
+  and: [{ _status: { equals: 'published' } }, { workflowStatus: { in: PUBLIC_WORKFLOW_STATUSES } }],
+}
+
 export const Posts: CollectionConfig = {
   slug: 'posts',
+  access: {
+    // Logged-in admin users see all posts; headless clients must send
+    // CMS_READ_API_KEY via `Authorization: Bearer` or `X-CMS-Read-Key`.
+    read: ({ req }) => {
+      debugger
+      if (req.user) return true
+      if (!canReadCmsContent(req)) return false
+      return publishedPostsWhere
+    },
+  },
   admin: {
     useAsTitle: 'title',
     hideAPIURL: process.env.NODE_ENV !== 'development',
@@ -22,8 +38,7 @@ export const Posts: CollectionConfig = {
       edit: {
         // Replace Payload's built-in "Publish Changes" button with our
         // role-aware workflow transition buttons.
-        PublishButton:
-          '@/custom/Components/Admin/WorkflowActionButtons.tsx#WorkflowActionButtons',
+        PublishButton: '@/custom/Components/Admin/WorkflowActionButtons.tsx#WorkflowActionButtons',
       },
     },
   },
@@ -118,10 +133,7 @@ export const Posts: CollectionConfig = {
             {
               type: 'date',
               name: 'date',
-              timezone: {
-                supportedTimezones: [{ value: 'America/New_York', label: 'East Coast' }],
-                defaultTimezone: 'America/New_York',
-              },
+              timezone: true,
               admin: {
                 date: {
                   pickerAppearance: 'dayAndTime',
@@ -158,11 +170,18 @@ export const Posts: CollectionConfig = {
               admin: { hidden: true, disabled: true },
               // and that it can't be updated
               access: {
-                update: () => false
+                update: () => false,
               },
               fields: [
                 { type: 'text', name: 'id' },
                 { type: 'text', name: 'name' },
+                { type: 'text', name: 'slug' },
+                { type: 'textarea', name: 'bio' },
+                // Resolved relative URL of the author's profile picture
+                // (e.g. `/api/media/file/avatar.jpg`). Headless consumers
+                // can prepend CMS_URL to render it without needing read
+                // access to the Users / Media collections.
+                { type: 'text', name: 'profilePicUrl' },
               ],
               // we'll make this a virtual field, which will show up in our API at read time but is not store in the database
               virtual: true,
@@ -181,8 +200,7 @@ export const Posts: CollectionConfig = {
               type: 'ui',
               admin: {
                 components: {
-                  Field:
-                    '@/custom/Components/Admin/ImportMarkdownButton.tsx#ImportMarkdownButton',
+                  Field: '@/custom/Components/Admin/ImportMarkdownButton.tsx#ImportMarkdownButton',
                 },
               },
             },

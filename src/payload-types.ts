@@ -45,7 +45,6 @@ export type SupportedTimezones =
   | 'Asia/Baku'
   | 'Asia/Karachi'
   | 'Asia/Tashkent'
-  | 'Asia/Calcutta'
   | 'Asia/Dhaka'
   | 'Asia/Almaty'
   | 'Asia/Jakarta'
@@ -59,7 +58,8 @@ export type SupportedTimezones =
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
-  | 'Pacific/Fiji';
+  | 'Pacific/Fiji'
+  | 'Asia/Calcutta';
 
 export interface Config {
   auth: {
@@ -476,6 +476,9 @@ export interface Post {
   populatedAuthor?: {
     id?: string | null;
     name?: string | null;
+    slug?: string | null;
+    bio?: string | null;
+    profilePicUrl?: string | null;
   };
   body: {
     root: {
@@ -892,6 +895,9 @@ export interface PostsSelect<T extends boolean = true> {
     | {
         id?: T;
         name?: T;
+        slug?: T;
+        bio?: T;
+        profilePicUrl?: T;
       };
   body?: T;
   meta?:

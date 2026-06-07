@@ -84,6 +84,7 @@ Create the following manually from the admin panel:
 |---|---|---|
 | `DATABASE_URI` | Yes | MongoDB connection string |
 | `PAYLOAD_SECRET` | Yes | Secret key for Payload authentication |
+| `CMS_READ_API_KEY` | Yes* | API key for headless frontends to read published posts via REST (`Authorization: Bearer <key>` or `X-CMS-Read-Key: <key>`). *Required when exposing the REST API to external apps |
 | `NEXT_PUBLIC_SERVER_URL` | Yes | Public URL of your site (e.g. `https://yourdomain.com`) |
 | `SITE_NAME` | No | Site name used in meta tags and admin (default: `Payload Starter`) |
 | `SITE_DESCRIPTION` | No | Default site description for meta tags |
