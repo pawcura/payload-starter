@@ -1,7 +1,11 @@
 import { type CollectionConfig, slugField } from 'payload'
+import { canReadCmsContent } from '@/utilities/cmsReadApiKey'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
+  access: {
+    read: ({ req }) => canReadCmsContent(req),
+  },
   admin: {
     useAsTitle: 'name',
   },

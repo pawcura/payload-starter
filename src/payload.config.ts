@@ -11,6 +11,7 @@ import { resendAdapter } from '@payloadcms/email-resend'
 import { seedEndpoint } from './seed'
 import { schedulePublishEndpoint } from './endpoints/schedulePublish'
 import { importMarkdownEndpoint } from './endpoints/importMarkdown'
+import { articlesListEndpoint, articleBySlugEndpoint } from './endpoints/articles'
 import { Users } from './collections/Users/config'
 import { Doctors } from './collections/Doctors/config'
 import { Media } from './collections/Media/config'
@@ -34,6 +35,17 @@ const siteDescription = process.env.SITE_DESCRIPTION || 'A Payload CMS starter t
 export default buildConfig({
   admin: {
     user: Users.slug,
+    timezones: {
+      // Node's ICU canonicalises `Asia/Kolkata` to `Asia/Calcutta`, so
+      // `Intl.supportedValuesOf('timeZone')` (and Payload's validator) only
+      // accepts `Asia/Calcutta`. Both refer to the same IANA zone (IST,
+      // UTC+05:30); we just relabel it for the admin UI.
+      supportedTimezones: ({ defaultTimezones }) => [
+        ...defaultTimezones.filter((tz) => tz.value !== 'Asia/Calcutta'),
+        { value: 'Asia/Calcutta', label: 'India Standard Time (IST)' },
+      ],
+      defaultTimezone: 'Asia/Calcutta',
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -73,7 +85,13 @@ export default buildConfig({
   defaultDepth: 2,
   blocks: [Hero, TextAndImage, Cards, Text],
   collections: [Users, Doctors, Media, Pages, Posts, Categories],
-  endpoints: [seedEndpoint, schedulePublishEndpoint, importMarkdownEndpoint],
+  endpoints: [
+    seedEndpoint,
+    schedulePublishEndpoint,
+    importMarkdownEndpoint,
+    articlesListEndpoint,
+    articleBySlugEndpoint,
+  ],
   globals: [Settings, Navigation],
   jobs: {
     tasks: [

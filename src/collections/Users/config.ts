@@ -12,6 +12,7 @@ export const Users: CollectionConfig = {
     slug: true,
     profilePic: true,
     role: true,
+    bio: true,
   },
   auth: true,
   fields: [
