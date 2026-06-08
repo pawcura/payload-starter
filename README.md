@@ -1,6 +1,6 @@
 # Payload Starter
 
-A production-ready starter template built with [Payload](https://payloadcms.com), Next.js, MongoDB, and S3-compatible storage.
+A production-ready starter template built with [Payload](https://payloadcms.com), Next.js, MongoDB, and S3-compatible storage. 
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/PLACEHOLDER)
 
